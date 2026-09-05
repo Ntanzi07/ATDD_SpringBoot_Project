@@ -1,4 +1,4 @@
-package org.grupo1.grupo_1_praticaatdd.domain.vo;
+package org.grupo1.grupo_1_praticaatdd.domain.userVo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

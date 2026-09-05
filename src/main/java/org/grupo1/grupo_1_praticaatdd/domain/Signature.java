@@ -30,9 +30,6 @@ public class Signature {
     private User user;
 
     //CONSTRUCTORS
-    protected Signature() {
-    }
-
     public Signature(User user) {
         this.plan = SignaturePlan.BASIC;
         CourseCredits = 0;

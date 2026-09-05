@@ -1,9 +1,9 @@
 package org.grupo1.grupo_1_praticaatdd.domain;
 
 import jakarta.persistence.*;
-import org.grupo1.grupo_1_praticaatdd.domain.vo.EncryptedPassword;
-import org.grupo1.grupo_1_praticaatdd.domain.vo.UserEmail;
-import org.grupo1.grupo_1_praticaatdd.domain.vo.UserName;
+import org.grupo1.grupo_1_praticaatdd.domain.userVo.EncryptedPassword;
+import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserEmail;
+import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserName;
 
 @Entity
 @Table(name = "user")
@@ -27,9 +27,6 @@ public class User {
 
 
     //CONSTRUCTORS
-    protected User() {
-    }
-
     public User(String name, String email, String encryptedPassword) {
         this.name = new UserName(name);
         this.email = new UserEmail(email);
