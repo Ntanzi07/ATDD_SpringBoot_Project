@@ -11,6 +11,10 @@ public class CourseDescription {
     @Column(name = "description", length = 1000)
     private String description;
 
+    //CONSTRUCTORS
+    protected CourseDescription() {
+    }
+
     public CourseDescription(String description) {
         this.description = description == null ? null : description.trim();
     }

@@ -3,6 +3,8 @@ package org.grupo1.grupo_1_praticaatdd.domain;
 import jakarta.persistence.*;
 import org.grupo1.grupo_1_praticaatdd.domain.enums.RegistrationNumberStatus;
 
+@Entity
+@Table(name = "RegistrationNumbers")
 public class RegistrationNumber {
 
     @Id
@@ -27,7 +29,10 @@ public class RegistrationNumber {
     @Column(nullable = false)
     private boolean bonus;
 
-    //CONSTRUCTOR
+    //CONSTRUCTORS
+    protected RegistrationNumber() {
+    }
+
     public RegistrationNumber(User user, Course course, boolean bonus) {
         this.user = user;
         this.course = course;

@@ -18,11 +18,17 @@ public class Course {
     @Embedded
     private CourseDescription description;
 
+    //CONSTRUCTORS
+    protected Course() {
+    }
+
     public Course(String title, String description) {
         this.title = new CourseTitle(title);
         this.description = new CourseDescription(description);
     }
 
+
+    //GETTERS
     public Long getId() {
         return id;
     }
@@ -35,6 +41,8 @@ public class Course {
         return description;
     }
 
+
+    //SETTERS
     public void changeTitle(String title) {
         this.title = new CourseTitle(title);
     }

@@ -6,7 +6,7 @@ import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserEmail;
 import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserName;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User {
 
     @Id
@@ -27,6 +27,9 @@ public class User {
 
 
     //CONSTRUCTORS
+    protected User() {
+    }
+
     public User(String name, String email, String encryptedPassword) {
         this.name = new UserName(name);
         this.email = new UserEmail(email);
@@ -55,7 +58,7 @@ public class User {
     }
 
 
-    public void modifyName (String name) {
+    public void modifyName(String name) {
         this.name = new UserName(name);
     }
 
@@ -63,7 +66,7 @@ public class User {
         this.email = new UserEmail(email);
     }
 
-    public void changeEncryptedPassword(String encryptedPassword){
+    public void changeEncryptedPassword(String encryptedPassword) {
         this.password = new EncryptedPassword(encryptedPassword);
     }
 

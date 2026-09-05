@@ -11,6 +11,9 @@ public class CourseTitle {
     @Column(name = "title", nullable = false)
     private String title;
 
+    //CONSTRUCTORS
+    protected CourseTitle() {
+    }
 
     public CourseTitle(String title) {
         String normalization = title == null ? null : title.trim();
