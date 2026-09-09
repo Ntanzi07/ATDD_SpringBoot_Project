@@ -86,9 +86,4 @@ public class RegistrationNumber {
         this.bonus = bonus;
     }
 
-    public boolean successfullyCompleted() {
-        return RegistrationNumberStatus.COMPLETED.equals(this.status)
-                && this.finalGrade != null
-                && this.finalGrade >= 7.0;
-    }
 }

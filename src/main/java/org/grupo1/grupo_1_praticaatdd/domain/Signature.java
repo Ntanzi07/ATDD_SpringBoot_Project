@@ -87,28 +87,4 @@ public class Signature {
         this.user = user;
     }
 
-    //HELPERS
-    public void addingCredits(int quantity) {
-        this.CourseCredits += quantity;
-    }
-
-    public void usingCredits() {
-        if (this.CourseCredits <= 0)
-            throw new IllegalStateException("User without credits for a new bonus course");
-        this.CourseCredits--;
-    }
-
-    public void addingConclusionSuccess() {
-        this.successFinishedCourses++;
-        addingCredits(3);
-        if (this.successFinishedCourses >= 12) {
-            this.plan = SignaturePlan.PREMIUM;
-        }
-    }
-
-    public void addingCoins(int quantity) {
-        this.coins += quantity;
-    }
-
-
 }

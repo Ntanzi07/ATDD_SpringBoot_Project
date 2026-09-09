@@ -7,17 +7,17 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Embeddable
-public class EncryptedPassword {
+public class UserPassword {
 
     private static final Pattern PATERN_PASSWORD = Pattern.compile("^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$");
 
     @Column(name = "password", nullable = false)
     private String password;
 
-    protected EncryptedPassword() {
+    protected UserPassword() {
     }
 
-    public EncryptedPassword(String password) {
+    public UserPassword(String password) {
         String normalization = password == null ? null : password.trim();
 
         if (normalization == null || normalization.isBlank())
@@ -30,7 +30,7 @@ public class EncryptedPassword {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        EncryptedPassword that = (EncryptedPassword) o;
+        UserPassword that = (UserPassword) o;
         return Objects.equals(password, that.password);
     }
 
@@ -38,4 +38,5 @@ public class EncryptedPassword {
     public int hashCode() {
         return Objects.hashCode(password);
     }
+
 }

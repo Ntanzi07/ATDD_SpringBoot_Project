@@ -1,7 +1,7 @@
 package org.grupo1.grupo_1_praticaatdd.domain;
 
 import jakarta.persistence.*;
-import org.grupo1.grupo_1_praticaatdd.domain.userVo.EncryptedPassword;
+import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserPassword;
 import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserEmail;
 import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserName;
 
@@ -20,7 +20,7 @@ public class User {
     private UserEmail email;
 
     @Embedded
-    private EncryptedPassword password;
+    private UserPassword password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Signature signature;
@@ -33,7 +33,8 @@ public class User {
     public User(String name, String email, String encryptedPassword) {
         this.name = new UserName(name);
         this.email = new UserEmail(email);
-        this.password = new EncryptedPassword(encryptedPassword);
+        this.password = new UserPassword(encryptedPassword);
+        this.signature = new Signature(this);
     }
 
     //GETTERS
@@ -49,7 +50,7 @@ public class User {
         return email;
     }
 
-    public EncryptedPassword getPassword() {
+    public UserPassword getPassword() {
         return password;
     }
 
@@ -57,7 +58,7 @@ public class User {
         return signature;
     }
 
-
+    //SETTERS
     public void modifyName(String name) {
         this.name = new UserName(name);
     }
@@ -66,14 +67,7 @@ public class User {
         this.email = new UserEmail(email);
     }
 
-    public void changeEncryptedPassword(String encryptedPassword) {
-        this.password = new EncryptedPassword(encryptedPassword);
-    }
-
-    public void linkSignature(Signature signature) {
-        this.signature = signature;
-        if (signature != null && signature.getUser() != this) {
-            signature.setUser(this);
-        }
+    public void changePassword(String encryptedPassword) {
+        this.password = new UserPassword(encryptedPassword);
     }
 }
