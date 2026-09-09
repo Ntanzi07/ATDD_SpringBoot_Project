@@ -22,6 +22,8 @@ public class UserPassword {
 
         if (normalization == null || normalization.isBlank())
             throw new IllegalArgumentException("password is required");
+        if(!PATERN_PASSWORD.matcher(password).matches())
+            throw new IllegalArgumentException("password in wrong format, it needs to follow the min 8 length, a Uppercase and and a especial character");
 
         this.password = normalization;
     }

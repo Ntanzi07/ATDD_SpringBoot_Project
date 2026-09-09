@@ -23,7 +23,7 @@ public class UserName {
         this.name = normalization;
     }
 
-    public String getValue() {
+    public String getName() {
         return name;
     }
 

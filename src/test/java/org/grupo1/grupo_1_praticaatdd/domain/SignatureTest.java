@@ -1,9 +1,6 @@
 package org.grupo1.grupo_1_praticaatdd.domain;
 
 import org.grupo1.grupo_1_praticaatdd.domain.enums.SignaturePlan;
-import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserEmail;
-import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserName;
-import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserPassword;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,13 +13,13 @@ public class SignatureTest {
     private User user1;
 
     @BeforeEach
-    void createSignature() {
+    void createSignatureTest() {
         user1 = new User("Nathan", "nathan@test.com", "@Link1234567");
         signature = new Signature(user1);
     }
 
     @Test
-    void returnAllField() {
+    void returnAllFieldTest() {
         assertAll(
                 () -> assertEquals(SignaturePlan.BASIC, signature.getPlan()),
                 () -> assertEquals(0, signature.getCourseCredits()),
@@ -33,7 +30,7 @@ public class SignatureTest {
     }
 
     @Test
-    void setAllField() {
+    void setAllFieldTest() {
         assertAll(
                 () -> {
                     signature.setPlan(SignaturePlan.PREMIUM);

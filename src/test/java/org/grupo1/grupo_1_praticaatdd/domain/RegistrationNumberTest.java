@@ -1,7 +1,6 @@
 package org.grupo1.grupo_1_praticaatdd.domain;
 
 import org.grupo1.grupo_1_praticaatdd.domain.enums.RegistrationNumberStatus;
-import org.grupo1.grupo_1_praticaatdd.domain.enums.SignaturePlan;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,14 +14,14 @@ public class RegistrationNumberTest {
     private User user1;
 
     @BeforeEach
-    void createSignature() {
+    void createSignatureTest() {
         user1 = new User("Nathan", "nathan@test.com", "@Link1234567");
         course1 = new Course("JavaWithALeles", "Java class with professor Leles");
         registrationNumber = new RegistrationNumber(user1, course1, false);
     }
 
     @Test
-    void returnAllField() {
+    void returnAllFieldTest() {
         assertAll(
                 () -> assertEquals(user1, registrationNumber.getUser()),
                 () -> assertEquals(course1, registrationNumber.getCourse()),
@@ -33,7 +32,7 @@ public class RegistrationNumberTest {
     }
 
     @Test
-    void setAllField() {
+    void setAllFieldTest() {
         assertAll(
                 () -> {
                     User user2 = new User("exemplo", "exemplo@teste.com", "Exe@1234567");

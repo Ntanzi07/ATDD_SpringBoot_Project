@@ -15,12 +15,12 @@ public class UserTest {
     private User user1;
 
     @BeforeEach
-    void createUser() {
+    void createUserTest() {
         user1 = new User("Nathan", "nathan@test.com", "@Link1234567");
     }
 
     @Test
-    void returnAllField() {
+    void returnAllFieldTest() {
         assertAll(
                 () -> assertEquals(new UserName("Nathan"), user1.getName()),
                 () -> assertEquals(new UserEmail("nathan@test.com"), user1.getEmail()),
@@ -30,7 +30,7 @@ public class UserTest {
     }
 
     @Test
-    void setAllField() {
+    void setAllFieldTest() {
         assertAll(
                 () -> {
                     user1.modifyName("Nathan Tanzi");

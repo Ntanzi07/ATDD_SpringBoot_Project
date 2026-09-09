@@ -2,7 +2,6 @@ package org.grupo1.grupo_1_praticaatdd.domain;
 
 import org.grupo1.grupo_1_praticaatdd.domain.courseVo.CourseDescription;
 import org.grupo1.grupo_1_praticaatdd.domain.courseVo.CourseTitle;
-import org.grupo1.grupo_1_praticaatdd.domain.enums.RegistrationNumberStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,12 +12,12 @@ public class CourseTest {
     private Course course1;
 
     @BeforeEach
-    void createSignature() {
+    void createSignatureTest() {
         course1 = new Course("JavaWithALeles", "Java class with professor Leles");
     }
 
     @Test
-    void returnAllField() {
+    void returnAllFieldTest() {
         assertAll(
                 () -> assertEquals(new CourseTitle("JavaWithALeles"), course1.getTitle()),
                 () -> assertEquals(new CourseDescription("Java class with professor Leles"), course1.getDescription())
@@ -26,7 +25,7 @@ public class CourseTest {
     }
 
     @Test
-    void setAllField() {
+    void setAllFieldTest() {
         assertAll(
                 () -> {
                     course1.changeTitle("DevOpsWithLeles");
