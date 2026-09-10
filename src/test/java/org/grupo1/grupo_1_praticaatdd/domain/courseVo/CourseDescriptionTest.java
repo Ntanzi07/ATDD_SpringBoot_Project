@@ -21,7 +21,7 @@ public class CourseDescriptionTest {
 
     @Test
     void getCourseDescriptionTest(){
-        assertEquals("Java class for all", description1.getDescription());
+        assertEquals("Java class for all", description1.getValue());
     }
 
     @Test

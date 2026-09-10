@@ -36,7 +36,7 @@ public class CourseTitleTest {
 
     @Test
     void getcourseTitleTest(){
-        assertEquals("Java Applications", courseTitle1.getTitle());
+        assertEquals("Java Applications", courseTitle1.getValue());
     }
 
     @Test

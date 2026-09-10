@@ -1,7 +1,7 @@
 package org.grupo1.grupo_1_praticaatdd.domain;
 
 import jakarta.persistence.*;
-import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserPassword;
+import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserEncryptedPassword;
 import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserEmail;
 import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserName;
 
@@ -20,7 +20,7 @@ public class User {
     private UserEmail email;
 
     @Embedded
-    private UserPassword password;
+    private UserEncryptedPassword password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Signature signature;
@@ -33,7 +33,7 @@ public class User {
     public User(String name, String email, String encryptedPassword) {
         this.name = new UserName(name);
         this.email = new UserEmail(email);
-        this.password = new UserPassword(encryptedPassword);
+        this.password = new UserEncryptedPassword(encryptedPassword);
         this.signature = new Signature(this);
     }
 
@@ -50,7 +50,7 @@ public class User {
         return email;
     }
 
-    public UserPassword getPassword() {
+    public UserEncryptedPassword getPassword() {
         return password;
     }
 
@@ -68,6 +68,6 @@ public class User {
     }
 
     public void changePassword(String encryptedPassword) {
-        this.password = new UserPassword(encryptedPassword);
+        this.password = new UserEncryptedPassword(encryptedPassword);
     }
 }

@@ -19,7 +19,7 @@ public class CourseDescription {
         this.description = description == null ? null : description.trim();
     }
 
-    public String getDescription() {
+    public String getValue() {
         return description;
     }
 
