@@ -23,7 +23,7 @@ public class UserRestController {
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO request) {
         UserResponseDTO response = userService.createUser(request);
 
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.status(201).body(response);
     }
 
     @GetMapping

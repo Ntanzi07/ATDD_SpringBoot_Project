@@ -3,6 +3,7 @@ package org.grupo1.grupo_1_praticaatdd.service;
 import org.grupo1.grupo_1_praticaatdd.domain.User;
 import org.grupo1.grupo_1_praticaatdd.dto.UserRequestDTO;
 import org.grupo1.grupo_1_praticaatdd.dto.UserResponseDTO;
+import org.grupo1.grupo_1_praticaatdd.exception.UserNotFoundException;
 import org.grupo1.grupo_1_praticaatdd.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class UserService {
 
     public UserResponseDTO getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(id));
 
         return new UserResponseDTO(user);
     }
@@ -58,7 +59,7 @@ public class UserService {
 
     public UserResponseDTO updateUser(Long id, UserRequestDTO request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(id));
 
         if (request.name() == null || request.name().isBlank())
             throw new IllegalArgumentException();
@@ -77,7 +78,7 @@ public class UserService {
 
     public UserResponseDTO deleteUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(id));
 
         userRepository.delete(user);
         return new UserResponseDTO(user);
