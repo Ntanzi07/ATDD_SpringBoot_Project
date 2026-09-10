@@ -60,6 +60,13 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (request.name() == null || request.name().isBlank())
+            throw new IllegalArgumentException();
+        if (request.email() == null || request.email().isBlank())
+            throw new IllegalArgumentException();
+        if (request.password() == null || request.password().isBlank())
+            throw new IllegalArgumentException();
+
         user.modifyName(request.name());
         user.modifyEmail(request.email());
         user.changePassword(encodePassword(request.password()));
