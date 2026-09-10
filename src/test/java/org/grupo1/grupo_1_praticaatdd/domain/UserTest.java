@@ -3,7 +3,7 @@ package org.grupo1.grupo_1_praticaatdd.domain;
 import org.grupo1.grupo_1_praticaatdd.domain.enums.SignaturePlan;
 import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserEmail;
 import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserName;
-import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserPassword;
+import org.grupo1.grupo_1_praticaatdd.domain.userVo.UserEncryptedPassword;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +24,7 @@ public class UserTest {
         assertAll(
                 () -> assertEquals(new UserName("Nathan"), user1.getName()),
                 () -> assertEquals(new UserEmail("nathan@test.com"), user1.getEmail()),
-                () -> assertEquals(new UserPassword("@Link1234567"), user1.getPassword()),
+                () -> assertEquals(new UserEncryptedPassword("@Link1234567"), user1.getPassword()),
                 () -> assertEquals(SignaturePlan.BASIC, user1.getSignature().getPlan())
         );
     }
@@ -42,7 +42,7 @@ public class UserTest {
                 },
                 () -> {
                     user1.changePassword("@Link176217");
-                    assertEquals(new UserPassword("@Link176217"), user1.getPassword());
+                    assertEquals(new UserEncryptedPassword("@Link176217"), user1.getPassword());
                 }
         );
     }
