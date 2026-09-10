@@ -49,7 +49,7 @@ public class UserEmailTest {
 
     @Test
     void getEmailTest(){
-        assertEquals("joao@teste.com", email1.getEmail());
+        assertEquals("joao@teste.com", email1.getValue());
     }
 
     @Test

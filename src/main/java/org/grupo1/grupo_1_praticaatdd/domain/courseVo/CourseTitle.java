@@ -23,7 +23,7 @@ public class CourseTitle {
         this.title = title;
     }
 
-    public String getTitle() {
+    public String getValue() {
         return title;
     }
 
