@@ -15,7 +15,6 @@ public class Signature {
     @Column(nullable = false)
     private SignaturePlan plan;
 
-
     @Column(nullable = false)
     private Integer CourseCredits;
 
@@ -87,4 +86,11 @@ public class Signature {
         this.user = user;
     }
 
+    public void registerCourseCompletion() {
+        this.successFinishedCourses++;
+
+        if (this.successFinishedCourses >= 12 && this.plan == SignaturePlan.BASIC) {
+            this.plan = SignaturePlan.PREMIUM;
+        }
+    }
 }
