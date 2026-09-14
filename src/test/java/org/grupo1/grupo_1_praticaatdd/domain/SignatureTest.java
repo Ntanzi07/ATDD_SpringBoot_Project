@@ -55,4 +55,48 @@ public class SignatureTest {
                 }
         );
     }
+
+    @Test
+    void upgradeToPremiumWhenReaching12CoursesTest() {
+        user1.getSignature().setSuccessFinishedCourses(11);
+        user1.getSignature().registerCourseCompletion();
+        assertAll(
+                () -> assertEquals(12, user1.getSignature().getSuccessFinishedCourses()),
+                () -> assertEquals(SignaturePlan.PREMIUM, user1.getSignature().getPlan())
+        );
+    }
+
+    @Test
+    void remainBasicWithLessThan12CoursesTest() {
+        user1.getSignature().setSuccessFinishedCourses(10);
+        user1.getSignature().registerCourseCompletion();
+        assertAll(
+                () -> assertEquals(11, user1.getSignature().getSuccessFinishedCourses()),
+                () -> assertEquals(SignaturePlan.BASIC, user1.getSignature().getPlan())
+        );
+    }
+
+    @Test
+    void remainPremiumWhenAlreadyPremiumTest() {
+        user1.getSignature().setPlan(SignaturePlan.PREMIUM);
+        user1.getSignature().setSuccessFinishedCourses(5);
+        user1.getSignature().registerCourseCompletion();
+        assertAll(
+                () -> assertEquals(6, user1.getSignature().getSuccessFinishedCourses()),
+                () -> assertEquals(SignaturePlan.PREMIUM, user1.getSignature().getPlan())
+        );
+    }
+
+    @Test
+    void notChangeWhenAlreadyPremiumWith12OrMoreCoursesTest() {
+        user1.getSignature().setPlan(SignaturePlan.PREMIUM);
+        user1.getSignature().setSuccessFinishedCourses(15);
+
+        user1.getSignature().registerCourseCompletion();
+
+        assertAll(
+                () -> assertEquals(16, user1.getSignature().getSuccessFinishedCourses()),
+                () -> assertEquals(SignaturePlan.PREMIUM, user1.getSignature().getPlan())
+        );
+    }
 }

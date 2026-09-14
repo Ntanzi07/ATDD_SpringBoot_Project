@@ -1,6 +1,8 @@
 package org.grupo1.grupo_1_praticaatdd.service;
 
+import org.grupo1.grupo_1_praticaatdd.domain.RegistrationNumber;
 import org.grupo1.grupo_1_praticaatdd.domain.Signature;
+import org.grupo1.grupo_1_praticaatdd.domain.enums.RegistrationNumberStatus;
 import org.grupo1.grupo_1_praticaatdd.dto.SignatureRequestDTO;
 import org.grupo1.grupo_1_praticaatdd.dto.SignatureResponseDTO;
 import org.grupo1.grupo_1_praticaatdd.exception.SignatureNotFoundException;

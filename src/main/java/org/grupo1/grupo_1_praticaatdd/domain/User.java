@@ -25,7 +25,6 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Signature signature;
 
-
     //CONSTRUCTORS
     protected User() {
     }
