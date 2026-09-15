@@ -3,6 +3,7 @@ package org.grupo1.grupo_1_praticaatdd.controller;
 import org.grupo1.grupo_1_praticaatdd.domain.User;
 import org.grupo1.grupo_1_praticaatdd.domain.enums.SignaturePlan;
 import org.grupo1.grupo_1_praticaatdd.dto.SignatureRequestDTO;
+import org.grupo1.grupo_1_praticaatdd.repository.RegistrationNumberRepository;
 import org.grupo1.grupo_1_praticaatdd.repository.SignatureRepository;
 import org.grupo1.grupo_1_praticaatdd.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,8 +37,12 @@ class SignatureRestControllerTest {
     @Autowired
     private SignatureRepository signatureRepository;
 
+    @Autowired
+    private RegistrationNumberRepository registrationNumberRepository;
+
     @BeforeEach
     void cleanDatabase() {
+        registrationNumberRepository.deleteAll();
         userRepository.deleteAll();
     }
 

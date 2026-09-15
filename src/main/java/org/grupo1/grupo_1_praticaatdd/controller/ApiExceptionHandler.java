@@ -4,6 +4,7 @@ package org.grupo1.grupo_1_praticaatdd.controller;
 import org.grupo1.grupo_1_praticaatdd.exception.UserNotFoundException;
 import org.grupo1.grupo_1_praticaatdd.exception.CourseNotFoundException;
 import org.grupo1.grupo_1_praticaatdd.exception.SignatureNotFoundException;
+import org.grupo1.grupo_1_praticaatdd.exception.RegistrationNumberNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,6 +29,11 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(SignatureNotFoundException.class)
     public ResponseEntity<String> handleSignatureNotFound(SignatureNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(RegistrationNumberNotFoundException.class)
+    public ResponseEntity<String> handleRegistrationNumberNotFound(RegistrationNumberNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }
