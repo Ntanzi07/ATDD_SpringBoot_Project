@@ -45,7 +45,6 @@ class RegistrationNumberRestControllerTest {
     @BeforeEach
     void cleanDatabase() {
         registrationNumberRepository.deleteAll();
-        courseRepository.deleteAll();
         userRepository.deleteAll();
     }
 
