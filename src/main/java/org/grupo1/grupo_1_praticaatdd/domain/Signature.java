@@ -7,6 +7,8 @@ import org.grupo1.grupo_1_praticaatdd.domain.enums.SignaturePlan;
 @Table(name = "signatures")
 public class Signature {
 
+    private static final int COURSES_TO_BECOME_PREMIUM = 12;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,7 +18,7 @@ public class Signature {
     private SignaturePlan plan;
 
     @Column(nullable = false)
-    private Integer CourseCredits;
+    private Integer courseCredits;
 
     @Column(nullable = false)
     private Integer successFinishedCourses;
@@ -34,7 +36,7 @@ public class Signature {
 
     public Signature(User user) {
         this.plan = SignaturePlan.BASIC;
-        CourseCredits = 0;
+        this.courseCredits = 0;
         this.successFinishedCourses = 0;
         this.coins = 0;
         this.user = user;
@@ -50,7 +52,7 @@ public class Signature {
     }
 
     public Integer getCourseCredits() {
-        return CourseCredits;
+        return courseCredits;
     }
 
     public Integer getSuccessFinishedCourses() {
@@ -71,7 +73,7 @@ public class Signature {
     }
 
     public void setCourseCredits(Integer courseCredits) {
-        CourseCredits = courseCredits;
+        this.courseCredits = courseCredits;
     }
 
     public void setSuccessFinishedCourses(Integer successFinishedCourses) {
@@ -89,8 +91,13 @@ public class Signature {
     public void registerCourseCompletion() {
         this.successFinishedCourses++;
 
-        if (this.successFinishedCourses >= 12 && this.plan == SignaturePlan.BASIC) {
+        if (shouldBePromotedToPremium()) {
             this.plan = SignaturePlan.PREMIUM;
         }
+    }
+
+    private boolean shouldBePromotedToPremium() {
+        return this.plan == SignaturePlan.BASIC
+                && this.successFinishedCourses >= COURSES_TO_BECOME_PREMIUM;
     }
 }

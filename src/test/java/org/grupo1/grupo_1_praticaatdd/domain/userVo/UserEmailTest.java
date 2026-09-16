@@ -66,4 +66,22 @@ public class UserEmailTest {
                 () -> assertNotEquals(email1.hashCode(), email3.hashCode())
         );
     }
+
+    /*
+     * Cenario: Quando comparar o objeto com null ou com um objeto de outro tipo
+     *          Entao equals retorna false
+     *
+     * [RED]   nao se aplica: equals ja existia; faltavam os ramos
+     *         "o == null" e "getClass() != o.getClass()" (AMARELO no JaCoCo do GREEN).
+     * [GREEN] codigo ja existente:
+     *             if (o == null || getClass() != o.getClass()) return false;
+     * [BLUE]  teste criado para cobrir os dois ramos. Resultado: PASSOU.
+     */
+    @Test
+    void notEqualToNullOrOtherTypeTest() {
+        assertAll(
+                () -> assertEquals(false, email1.equals(null)),
+                () -> assertEquals(false, email1.equals("outro tipo"))
+        );
+    }
 }

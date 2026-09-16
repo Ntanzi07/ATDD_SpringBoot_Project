@@ -1,122 +1,118 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useEffect, useState } from 'react'
 import './App.css'
+import { getBaseUrl, onRequest, readStorage, setBaseUrl, writeStorage } from './api'
+import Courses from './pages/Courses'
+import Registrations from './pages/Registrations'
+import Signatures from './pages/Signatures'
+import Users from './pages/Users'
 
-function App() {
-  const [count, setCount] = useState(0)
+const PAGES = [
+  { key: 'users', label: 'Usuários', path: '/users', Component: Users },
+  { key: 'courses', label: 'Cursos', path: '/courses', Component: Courses },
+  { key: 'registrations', label: 'Matrículas', path: '/registration-numbers', Component: Registrations },
+  { key: 'signatures', label: 'Assinaturas', path: '/signatures', Component: Signatures },
+]
+
+export default function App() {
+  const [page, setPage] = useState(() => readStorage('atdd.page', 'users'))
+  const [log, setLog] = useState([])
+  const [logOpen, setLogOpen] = useState(true)
+
+  useEffect(() => onRequest(entry => setLog(prev => [entry, ...prev].slice(0, 50))), [])
+
+  const current = PAGES.find(p => p.key === page) ?? PAGES[0]
+  const { Component } = current
+
+  const go = key => {
+    setPage(key)
+    writeStorage('atdd.page', key)
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className={`app ${logOpen ? 'with-log' : ''}`}>
+      <nav className="sidebar">
+        <div className="brand">
+          <strong>TopClass</strong>
+          <span className="muted small">Painel de testes da API</span>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
+        {PAGES.map(p => (
+          <button key={p.key} type="button" className={p.key === current.key ? 'nav active' : 'nav'} onClick={() => go(p.key)}>
+            <span>{p.label}</span>
+            <code>{p.path}</code>
+          </button>
+        ))}
+        <ApiBase />
+        <button type="button" className="ghost small-btn" onClick={() => setLogOpen(o => !o)}>
+          {logOpen ? 'Esconder log' : 'Mostrar log'}
         </button>
-      </section>
+      </nav>
 
-      <div className="ticks"></div>
+      <main className="content">
+        <Component key={current.key} />
+      </main>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      {logOpen && <RequestLog entries={log} onClear={() => setLog([])} />}
+    </div>
   )
 }
 
-export default App
+function ApiBase() {
+  const [value, setValue] = useState(getBaseUrl())
+  const [saved, setSaved] = useState(false)
+
+  return (
+    <form
+      className="api-base"
+      onSubmit={e => {
+        e.preventDefault()
+        setBaseUrl(value)
+        setSaved(true)
+        setTimeout(() => window.location.reload(), 300)
+      }}
+    >
+      <label className="field">
+        <span className="small">URL da API</span>
+        <input value={value} onChange={e => setValue(e.target.value)} placeholder="(mesma origem)" />
+      </label>
+      <button type="submit" className="ghost small-btn">{saved ? 'Salvo' : 'Aplicar'}</button>
+    </form>
+  )
+}
+
+function RequestLog({ entries, onClear }) {
+  const [openId, setOpenId] = useState(null)
+
+  return (
+    <aside className="log">
+      <div className="log-header">
+        <h2>Requisições</h2>
+        <button type="button" className="link" onClick={onClear}>Limpar</button>
+      </div>
+      {entries.length === 0 && <p className="muted small">As chamadas feitas para a API aparecem aqui.</p>}
+      <ul>
+        {entries.map(e => (
+          <li key={e.id}>
+            <button type="button" className="log-line" onClick={() => setOpenId(openId === e.id ? null : e.id)}>
+              <span className={`method m-${e.method.toLowerCase()}`}>{e.method}</span>
+              <span className="path">{e.url.replace(/^https?:\/\/[^/]+/, '')}</span>
+              <span className={`status s-${String(e.status)[0]}`}>{e.status || 'ERR'}</span>
+            </button>
+            {openId === e.id && (
+              <div className="log-detail">
+                <small className="muted">{e.ms} ms · {e.at.toLocaleTimeString()}</small>
+                {e.requestBody !== undefined && (
+                  <>
+                    <small>Request body</small>
+                    <pre className="json">{JSON.stringify(e.requestBody, null, 2)}</pre>
+                  </>
+                )}
+                <small>Response</small>
+                <pre className="json">{typeof e.responseBody === 'string' ? e.responseBody : JSON.stringify(e.responseBody, null, 2)}</pre>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )
+}

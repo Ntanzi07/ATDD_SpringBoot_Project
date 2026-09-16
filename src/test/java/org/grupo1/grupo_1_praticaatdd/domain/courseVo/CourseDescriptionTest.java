@@ -38,4 +38,37 @@ public class CourseDescriptionTest {
                 () -> assertNotEquals(description1.hashCode(), description3.hashCode())
         );
     }
+
+    /*
+     * Cenario: Quando comparar o objeto com null ou com um objeto de outro tipo
+     *          Entao equals retorna false
+     *
+     * [RED]   nao se aplica: equals ja existia; faltavam os ramos
+     *         "o == null" e "getClass() != o.getClass()" (AMARELO no JaCoCo do GREEN).
+     * [GREEN] codigo ja existente:
+     *             if (o == null || getClass() != o.getClass()) return false;
+     * [BLUE]  teste criado para cobrir os dois ramos. Resultado: PASSOU.
+     */
+    @Test
+    void notEqualToNullOrOtherTypeTest() {
+        assertAll(
+                () -> assertEquals(false, description1.equals(null)),
+                () -> assertEquals(false, description1.equals("outro tipo"))
+        );
+    }
+
+    /*
+     * Cenario: Quando criar a descricao com null
+     *          Entao o valor fica null (descricao e opcional)
+     *
+     * [RED]   nao se aplica: o ternario ja existia; faltava o ramo "description == null"
+     *         (AMARELO no JaCoCo do GREEN).
+     * [GREEN] codigo ja existente:
+     *             this.description = description == null ? null : description.trim();
+     * [BLUE]  teste criado para cobrir o ramo. Resultado: PASSOU.
+     */
+    @Test
+    void nullDescriptionTest() {
+        assertEquals(null, new CourseDescription(null).getValue());
+    }
 }

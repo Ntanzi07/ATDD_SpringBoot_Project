@@ -9,6 +9,7 @@ import org.grupo1.grupo_1_praticaatdd.dto.ConcludeRegistrationNumberRequestDTO;
 import org.grupo1.grupo_1_praticaatdd.dto.RegistrationNumberRequestDTO;
 import org.grupo1.grupo_1_praticaatdd.dto.RegistrationNumberResponseDTO;
 import org.grupo1.grupo_1_praticaatdd.exception.CourseNotFoundException;
+import org.grupo1.grupo_1_praticaatdd.exception.RegistrationNumberNotFoundException;
 import org.grupo1.grupo_1_praticaatdd.exception.UserNotFoundException;
 import org.grupo1.grupo_1_praticaatdd.repository.CourseRepository;
 import org.grupo1.grupo_1_praticaatdd.repository.RegistrationNumberRepository;
@@ -21,10 +22,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -102,5 +106,60 @@ class RegistrationNumberServiceTest {
         when(courseRepository.findById(2L)).thenReturn(Optional.empty());
         assertThrows(CourseNotFoundException.class, () -> registrationNumberService.enroll(
                 new RegistrationNumberRequestDTO(1L, 2L, false)));
+    }
+
+    @Test
+    void getsRegistrationById() {
+        User user = new User("Amanda", "amanda@test.com", "Hash@123456");
+        Course course = new Course("Java", "Java course");
+        RegistrationNumber registrationNumber = new RegistrationNumber(user, course, true);
+        when(registrationNumberRepository.findById(1L)).thenReturn(Optional.of(registrationNumber));
+
+        RegistrationNumberResponseDTO response = registrationNumberService.getById(1L);
+
+        assertAll(
+                () -> assertEquals(RegistrationNumberStatus.IN_PROGRESS, response.status()),
+                () -> assertEquals(true, response.bonus())
+        );
+    }
+
+    @Test
+    void failsWhenRegistrationDoesNotExist() {
+        when(registrationNumberRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertAll(
+                () -> assertThrows(RegistrationNumberNotFoundException.class,
+                        () -> registrationNumberService.getById(99L)),
+                () -> assertThrows(RegistrationNumberNotFoundException.class,
+                        () -> registrationNumberService.conclude(99L, new ConcludeRegistrationNumberRequestDTO(8.0)))
+        );
+    }
+
+    @Test
+    void rejectsFinalGradeOutOfRange() {
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class,
+                        () -> registrationNumberService.conclude(1L, new ConcludeRegistrationNumberRequestDTO(null))),
+                () -> assertThrows(IllegalArgumentException.class,
+                        () -> registrationNumberService.conclude(1L, new ConcludeRegistrationNumberRequestDTO(-0.1))),
+                () -> assertThrows(IllegalArgumentException.class,
+                        () -> registrationNumberService.conclude(1L, new ConcludeRegistrationNumberRequestDTO(10.1)))
+        );
+        verifyNoInteractions(registrationNumberRepository);
+    }
+
+    @Test
+    void rejectsConcludingRegistrationNotInProgress() {
+        User user = new User("Amanda", "amanda@test.com", "Hash@123456");
+        Course course = new Course("Java", "Java course");
+        RegistrationNumber registrationNumber = new RegistrationNumber(user, course, false);
+        registrationNumber.setRegistrationNumberStatus(RegistrationNumberStatus.COMPLETED);
+        when(registrationNumberRepository.findById(1L)).thenReturn(Optional.of(registrationNumber));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> registrationNumberService.conclude(1L, new ConcludeRegistrationNumberRequestDTO(9.0)));
+
+        assertEquals(0, user.getSignature().getSuccessFinishedCourses());
+        verify(registrationNumberRepository, never()).save(any(RegistrationNumber.class));
     }
 }
