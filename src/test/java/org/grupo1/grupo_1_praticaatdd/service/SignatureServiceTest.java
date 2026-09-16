@@ -128,4 +128,22 @@ public class SignatureServiceTest {
                         () -> signatureService.deleteSignature(1L))
         );
     }
+
+    @Test
+    void updateWithoutPlanKeepsCurrentPlanTest() {
+        User user = new User("Amanda", "amanda@test.com", "Hash@123456");
+        Signature signature = user.getSignature();
+        signature.setPlan(SignaturePlan.PREMIUM);
+
+        when(signatureRepository.findById(1L)).thenReturn(Optional.of(signature));
+        when(signatureRepository.save(signature)).thenReturn(signature);
+
+        SignatureResponseDTO response = signatureService.updateSignature(1L,
+                new SignatureRequestDTO(null, 3, null, null, null));
+
+        assertAll(
+                () -> assertEquals(SignaturePlan.PREMIUM, response.plan()),
+                () -> assertEquals(3, response.courseCredits())
+        );
+    }
 }

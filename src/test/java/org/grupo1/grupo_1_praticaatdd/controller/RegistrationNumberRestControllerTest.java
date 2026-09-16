@@ -1,6 +1,7 @@
 package org.grupo1.grupo_1_praticaatdd.controller;
 
 import org.grupo1.grupo_1_praticaatdd.domain.Course;
+import org.grupo1.grupo_1_praticaatdd.domain.RegistrationNumber;
 import org.grupo1.grupo_1_praticaatdd.domain.User;
 import org.grupo1.grupo_1_praticaatdd.dto.ConcludeRegistrationNumberRequestDTO;
 import org.grupo1.grupo_1_praticaatdd.dto.RegistrationNumberRequestDTO;
@@ -17,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -91,5 +93,18 @@ class RegistrationNumberRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ConcludeRegistrationNumberRequestDTO(8.5))))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void returnsRegistrationById() throws Exception {
+        User user = userRepository.save(new User("Amanda", "amanda@test.com", "Hash@123456"));
+        Course course = courseRepository.save(new Course("Java", "Java course"));
+        RegistrationNumber registrationNumber = registrationNumberRepository.save(new RegistrationNumber(user, course, true));
+
+        mockMvc.perform(get("/registration-numbers/" + registrationNumber.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(registrationNumber.getId()))
+                .andExpect(jsonPath("$.status").value("IN_PROGRESS"))
+                .andExpect(jsonPath("$.bonus").value(true));
     }
 }

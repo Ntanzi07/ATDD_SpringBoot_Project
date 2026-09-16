@@ -18,6 +18,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegistrationNumberService {
 
+    private static final double MIN_GRADE = 0.0;
+    private static final double MAX_GRADE = 10.0;
+    private static final double PASSING_GRADE = 7.0;
+
     private final RegistrationNumberRepository registrationNumberRepository;
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
@@ -45,26 +49,40 @@ public class RegistrationNumberService {
     }
 
     public RegistrationNumberResponseDTO conclude(Long id, ConcludeRegistrationNumberRequestDTO request) {
-        if (request.finalGrade() == null || request.finalGrade() < 0 || request.finalGrade() > 10) {
-            throw new IllegalArgumentException("Final grade must be between 0 and 10");
-        }
+        Double finalGrade = request.finalGrade();
+        validateFinalGrade(finalGrade);
 
         RegistrationNumber registrationNumber = findById(id);
-        if (registrationNumber.getRegistrationNumberStatus() != RegistrationNumberStatus.IN_PROGRESS) {
-            throw new IllegalArgumentException("Registration number is not in progress");
-        }
+        ensureInProgress(registrationNumber);
 
-        registrationNumber.setFinalGrade(request.finalGrade());
+        registrationNumber.setFinalGrade(finalGrade);
         registrationNumber.setRegistrationNumberStatus(RegistrationNumberStatus.COMPLETED);
-        if (request.finalGrade() >= 7.0) {
+
+        if (isApproved(finalGrade)) {
             registrationNumber.getUser().getSignature().registerCourseCompletion();
         }
 
         return new RegistrationNumberResponseDTO(registrationNumberRepository.save(registrationNumber));
     }
 
+    private void validateFinalGrade(Double finalGrade) {
+        if (finalGrade == null || finalGrade < MIN_GRADE || finalGrade > MAX_GRADE) {
+            throw new IllegalArgumentException("Final grade must be between 0 and 10");
+        }
+    }
+
+    private void ensureInProgress(RegistrationNumber registrationNumber) {
+        if (registrationNumber.getRegistrationNumberStatus() != RegistrationNumberStatus.IN_PROGRESS) {
+            throw new IllegalArgumentException("Registration number is not in progress");
+        }
+    }
+
+    private boolean isApproved(Double finalGrade) {
+        return finalGrade >= PASSING_GRADE;
+    }
+
     private RegistrationNumber findById(Long id) {
         return registrationNumberRepository.findById(id)
                 .orElseThrow(() -> new RegistrationNumberNotFoundException(id));
     }
-}
+}
