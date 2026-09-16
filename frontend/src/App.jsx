@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
-const API = 'http://localhost:8080'
+const API = window.location.port === '5173' ? 'http://localhost:8080' : ''
 
 function App() {
   const [page, setPage] = useState('users')
