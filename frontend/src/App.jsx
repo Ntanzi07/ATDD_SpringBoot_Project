@@ -1,121 +1,288 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useState, useEffect } from 'react'
 import './App.css'
 
+const API = 'http://localhost:8080'
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [page, setPage] = useState('users')
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
+    <div className="app">
+      <nav className="sidebar">
+        <h2>ATDD</h2>
+        <button className={page === 'users' ? 'active' : ''} onClick={() => setPage('users')}>Usuários</button>
+        <button className={page === 'courses' ? 'active' : ''} onClick={() => setPage('courses')}>Cursos</button>
+        <button className={page === 'create-user' ? 'active' : ''} onClick={() => setPage('create-user')}>Novo Usuário</button>
+        <button className={page === 'registration' ? 'active' : ''} onClick={() => setPage('registration')}>Matrícula</button>
+        <button className={page === 'status' ? 'active' : ''} onClick={() => setPage('status')}>Status Matrícula</button>
+      </nav>
+      <main className="content">
+        {page === 'users' && <UserList />}
+        {page === 'courses' && <CourseList />}
+        {page === 'create-user' && <CreateUser onCreated={() => setPage('users')} />}
+        {page === 'registration' && <CreateRegistration />}
+        {page === 'status' && <RegistrationStatus />}
+      </main>
+    </div>
+  )
+}
+
+// 1. Tela de listagem de usuarios
+function UserList() {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`${API}/users`)
+      .then(r => r.json())
+      .then(data => setUsers(data))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <p>Carregando...</p>
+
+  return (
+    <div>
+      <h1>Usuários</h1>
+      {users.length === 0 ? (
+        <p>Nenhum usuário cadastrado.</p>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(u => (
+              <tr key={u.id}>
+                <td>{u.id}</td>
+                <td>{u.name}</td>
+                <td>{u.email}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  )
+}
+
+// 2. Tela de listagem de cursos
+function CourseList() {
+  const [courses, setCourses] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`${API}/courses`)
+      .then(r => r.json())
+      .then(data => setCourses(data))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <p>Carregando...</p>
+
+  return (
+    <div>
+      <h1>Cursos</h1>
+      {courses.length === 0 ? (
+        <p>Nenhum curso cadastrado.</p>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Descrição</th>
+            </tr>
+          </thead>
+          <tbody>
+            {courses.map(c => (
+              <tr key={c.id}>
+                <td>{c.id}</td>
+                <td>{c.title}</td>
+                <td>{c.description}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  )
+}
+
+// 3. Formulario de criacao de usuario
+function CreateUser({ onCreated }) {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    fetch(`${API}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    })
+      .then(r => {
+        if (!r.ok) return r.text().then(t => { throw new Error(t) })
+        return r.json()
+      })
+      .then(() => {
+        alert('Usuário criado!')
+        onCreated()
+      })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false))
+  }
+
+  return (
+    <div>
+      <h1>Novo Usuário</h1>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Nome
+          <input type="text" value={name} onChange={e => setName(e.target.value)} required />
+        </label>
+        <label>
+          Email
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+        </label>
+        <label>
+          Senha
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+        </label>
+        {error && <p className="error">{error}</p>}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Criando...' : 'Criar'}
         </button>
-      </section>
+      </form>
+    </div>
+  )
+}
 
-      <div className="ticks"></div>
+// 4. Formulario de matricula (usuario + curso)
+function CreateRegistration() {
+  const [userId, setUserId] = useState('')
+  const [courseId, setCourseId] = useState('')
+  const [users, setUsers] = useState([])
+  const [courses, setCourses] = useState([])
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+  useEffect(() => {
+    fetch(`${API}/users`).then(r => r.json()).then(setUsers).catch(() => {})
+    fetch(`${API}/courses`).then(r => r.json()).then(setCourses).catch(() => {})
+  }, [])
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    fetch(`${API}/registration-numbers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: Number(userId), courseId: Number(courseId), bonus: false })
+    })
+      .then(r => {
+        if (!r.ok) return r.text().then(t => { throw new Error(t) })
+        return r.json()
+      })
+      .then(() => {
+        alert('Matrícula criada!')
+        setUserId('')
+        setCourseId('')
+      })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false))
+  }
+
+  return (
+    <div>
+      <h1>Nova Matrícula</h1>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Usuário
+          <select value={userId} onChange={e => setUserId(e.target.value)} required>
+            <option value="">Selecione...</option>
+            {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+          </select>
+        </label>
+        <label>
+          Curso
+          <select value={courseId} onChange={e => setCourseId(e.target.value)} required>
+            <option value="">Selecione...</option>
+            {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+          </select>
+        </label>
+        {error && <p className="error">{error}</p>}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Matriculando...' : 'Matricular'}
+        </button>
+      </form>
+    </div>
+  )
+}
+
+// 5. Exibir status da matricula
+function RegistrationStatus() {
+  const [regId, setRegId] = useState('')
+  const [data, setData] = useState(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    setError('')
+    setData(null)
+    setLoading(true)
+
+    fetch(`${API}/registration-numbers/${regId}`)
+      .then(r => {
+        if (!r.ok) return r.text().then(t => { throw new Error(t) })
+        return r.json()
+      })
+      .then(setData)
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false))
+  }
+
+  return (
+    <div>
+      <h1>Status da Matrícula</h1>
+      <form onSubmit={handleSearch}>
+        <label>
+          ID da Matrícula
+          <input type="number" value={regId} onChange={e => setRegId(e.target.value)} required />
+        </label>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Buscando...' : 'Buscar'}
+        </button>
+      </form>
+
+      {error && <p className="error">{error}</p>}
+
+      {data && (
+        <div className="status-card">
+          <h2>Matrícula #{data.id}</h2>
+          <p><strong>Usuário:</strong> {data.userName}</p>
+          <p><strong>Curso:</strong> {data.courseTitle}</p>
+          <p><strong>Status:</strong> <span className={`badge ${data.registrationNumberStatus}`}>{data.registrationNumberStatus}</span></p>
+          {data.finalGrade != null && <p><strong>Nota Final:</strong> {data.finalGrade}</p>}
+          <p><strong>Bônus:</strong> {data.bonus ? 'Sim' : 'Não'}</p>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      )}
+    </div>
   )
 }
 
