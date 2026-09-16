@@ -13,6 +13,7 @@ function App() {
         <button className={page === 'users' ? 'active' : ''} onClick={() => setPage('users')}>Usuários</button>
         <button className={page === 'courses' ? 'active' : ''} onClick={() => setPage('courses')}>Cursos</button>
         <button className={page === 'create-user' ? 'active' : ''} onClick={() => setPage('create-user')}>Novo Usuário</button>
+        <button className={page === 'create-course' ? 'active' : ''} onClick={() => setPage('create-course')}>Novo Curso</button>
         <button className={page === 'registration' ? 'active' : ''} onClick={() => setPage('registration')}>Matrícula</button>
         <button className={page === 'status' ? 'active' : ''} onClick={() => setPage('status')}>Status Matrícula</button>
       </nav>
@@ -20,6 +21,7 @@ function App() {
         {page === 'users' && <UserList />}
         {page === 'courses' && <CourseList />}
         {page === 'create-user' && <CreateUser onCreated={() => setPage('users')} />}
+        {page === 'create-course' && <CreateCourse />}
         {page === 'registration' && <CreateRegistration />}
         {page === 'status' && <RegistrationStatus />}
       </main>
@@ -27,7 +29,6 @@ function App() {
   )
 }
 
-// 1. Tela de listagem de usuarios
 function UserList() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -71,7 +72,6 @@ function UserList() {
   )
 }
 
-// 2. Tela de listagem de cursos
 function CourseList() {
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
@@ -115,7 +115,6 @@ function CourseList() {
   )
 }
 
-// 3. Formulario de criacao de usuario
 function CreateUser({ onCreated }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -170,7 +169,56 @@ function CreateUser({ onCreated }) {
   )
 }
 
-// 4. Formulario de matricula (usuario + curso)
+function CreateCourse() {
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    fetch(`${API}/courses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description })
+    })
+      .then(r => {
+        if (!r.ok) return r.text().then(t => { throw new Error(t) })
+        return r.json()
+      })
+      .then(() => {
+        alert('Curso criado!')
+        setTitle('')
+        setDescription('')
+      })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false))
+  }
+
+  return (
+    <div>
+      <h1>Novo Curso</h1>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Título
+          <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+        </label>
+        <label>
+          Descrição
+          <input type="text" value={description} onChange={e => setDescription(e.target.value)} required />
+        </label>
+        {error && <p className="error">{error}</p>}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Criando...' : 'Criar'}
+        </button>
+      </form>
+    </div>
+  )
+}
+
 function CreateRegistration() {
   const [userId, setUserId] = useState('')
   const [courseId, setCourseId] = useState('')
@@ -234,7 +282,6 @@ function CreateRegistration() {
   )
 }
 
-// 5. Exibir status da matricula
 function RegistrationStatus() {
   const [regId, setRegId] = useState('')
   const [data, setData] = useState(null)
@@ -275,9 +322,9 @@ function RegistrationStatus() {
       {data && (
         <div className="status-card">
           <h2>Matrícula #{data.id}</h2>
-          <p><strong>Usuário:</strong> {data.userName}</p>
-          <p><strong>Curso:</strong> {data.courseTitle}</p>
-          <p><strong>Status:</strong> <span className={`badge ${data.registrationNumberStatus}`}>{data.registrationNumberStatus}</span></p>
+          <p><strong>Usuário ID:</strong> {data.userId}</p>
+          <p><strong>Curso ID:</strong> {data.courseId}</p>
+          <p><strong>Status:</strong> <span className={`badge ${data.status}`}>{data.status}</span></p>
           {data.finalGrade != null && <p><strong>Nota Final:</strong> {data.finalGrade}</p>}
           <p><strong>Bônus:</strong> {data.bonus ? 'Sim' : 'Não'}</p>
         </div>
