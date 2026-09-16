@@ -1,336 +1,118 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
+import { getBaseUrl, onRequest, readStorage, setBaseUrl, writeStorage } from './api'
+import Courses from './pages/Courses'
+import Registrations from './pages/Registrations'
+import Signatures from './pages/Signatures'
+import Users from './pages/Users'
 
-const API = window.location.port === '5173' ? 'http://localhost:8080' : ''
+const PAGES = [
+  { key: 'users', label: 'Usuários', path: '/users', Component: Users },
+  { key: 'courses', label: 'Cursos', path: '/courses', Component: Courses },
+  { key: 'registrations', label: 'Matrículas', path: '/registration-numbers', Component: Registrations },
+  { key: 'signatures', label: 'Assinaturas', path: '/signatures', Component: Signatures },
+]
 
-function App() {
-  const [page, setPage] = useState('users')
+export default function App() {
+  const [page, setPage] = useState(() => readStorage('atdd.page', 'users'))
+  const [log, setLog] = useState([])
+  const [logOpen, setLogOpen] = useState(true)
+
+  useEffect(() => onRequest(entry => setLog(prev => [entry, ...prev].slice(0, 50))), [])
+
+  const current = PAGES.find(p => p.key === page) ?? PAGES[0]
+  const { Component } = current
+
+  const go = key => {
+    setPage(key)
+    writeStorage('atdd.page', key)
+  }
 
   return (
-    <div className="app">
+    <div className={`app ${logOpen ? 'with-log' : ''}`}>
       <nav className="sidebar">
-        <h2>ATDD</h2>
-        <button className={page === 'users' ? 'active' : ''} onClick={() => setPage('users')}>Usuários</button>
-        <button className={page === 'courses' ? 'active' : ''} onClick={() => setPage('courses')}>Cursos</button>
-        <button className={page === 'create-user' ? 'active' : ''} onClick={() => setPage('create-user')}>Novo Usuário</button>
-        <button className={page === 'create-course' ? 'active' : ''} onClick={() => setPage('create-course')}>Novo Curso</button>
-        <button className={page === 'registration' ? 'active' : ''} onClick={() => setPage('registration')}>Matrícula</button>
-        <button className={page === 'status' ? 'active' : ''} onClick={() => setPage('status')}>Status Matrícula</button>
-      </nav>
-      <main className="content">
-        {page === 'users' && <UserList />}
-        {page === 'courses' && <CourseList />}
-        {page === 'create-user' && <CreateUser onCreated={() => setPage('users')} />}
-        {page === 'create-course' && <CreateCourse />}
-        {page === 'registration' && <CreateRegistration />}
-        {page === 'status' && <RegistrationStatus />}
-      </main>
-    </div>
-  )
-}
-
-function UserList() {
-  const [users, setUsers] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch(`${API}/users`)
-      .then(r => r.json())
-      .then(data => setUsers(data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false))
-  }, [])
-
-  if (loading) return <p>Carregando...</p>
-
-  return (
-    <div>
-      <h1>Usuários</h1>
-      {users.length === 0 ? (
-        <p>Nenhum usuário cadastrado.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(u => (
-              <tr key={u.id}>
-                <td>{u.id}</td>
-                <td>{u.name}</td>
-                <td>{u.email}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
-  )
-}
-
-function CourseList() {
-  const [courses, setCourses] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch(`${API}/courses`)
-      .then(r => r.json())
-      .then(data => setCourses(data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false))
-  }, [])
-
-  if (loading) return <p>Carregando...</p>
-
-  return (
-    <div>
-      <h1>Cursos</h1>
-      {courses.length === 0 ? (
-        <p>Nenhum curso cadastrado.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Título</th>
-              <th>Descrição</th>
-            </tr>
-          </thead>
-          <tbody>
-            {courses.map(c => (
-              <tr key={c.id}>
-                <td>{c.id}</td>
-                <td>{c.title}</td>
-                <td>{c.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
-  )
-}
-
-function CreateUser({ onCreated }) {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    fetch(`${API}/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
-    })
-      .then(r => {
-        if (!r.ok) return r.text().then(t => { throw new Error(t) })
-        return r.json()
-      })
-      .then(() => {
-        alert('Usuário criado!')
-        onCreated()
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
-  }
-
-  return (
-    <div>
-      <h1>Novo Usuário</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Nome
-          <input type="text" value={name} onChange={e => setName(e.target.value)} required />
-        </label>
-        <label>
-          Email
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-        </label>
-        <label>
-          Senha
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
-        </label>
-        {error && <p className="error">{error}</p>}
-        <button type="submit" disabled={loading}>
-          {loading ? 'Criando...' : 'Criar'}
-        </button>
-      </form>
-    </div>
-  )
-}
-
-function CreateCourse() {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    fetch(`${API}/courses`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, description })
-    })
-      .then(r => {
-        if (!r.ok) return r.text().then(t => { throw new Error(t) })
-        return r.json()
-      })
-      .then(() => {
-        alert('Curso criado!')
-        setTitle('')
-        setDescription('')
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
-  }
-
-  return (
-    <div>
-      <h1>Novo Curso</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Título
-          <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
-        </label>
-        <label>
-          Descrição
-          <input type="text" value={description} onChange={e => setDescription(e.target.value)} required />
-        </label>
-        {error && <p className="error">{error}</p>}
-        <button type="submit" disabled={loading}>
-          {loading ? 'Criando...' : 'Criar'}
-        </button>
-      </form>
-    </div>
-  )
-}
-
-function CreateRegistration() {
-  const [userId, setUserId] = useState('')
-  const [courseId, setCourseId] = useState('')
-  const [users, setUsers] = useState([])
-  const [courses, setCourses] = useState([])
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    fetch(`${API}/users`).then(r => r.json()).then(setUsers).catch(() => {})
-    fetch(`${API}/courses`).then(r => r.json()).then(setCourses).catch(() => {})
-  }, [])
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    fetch(`${API}/registration-numbers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: Number(userId), courseId: Number(courseId), bonus: false })
-    })
-      .then(r => {
-        if (!r.ok) return r.text().then(t => { throw new Error(t) })
-        return r.json()
-      })
-      .then(() => {
-        alert('Matrícula criada!')
-        setUserId('')
-        setCourseId('')
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
-  }
-
-  return (
-    <div>
-      <h1>Nova Matrícula</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Usuário
-          <select value={userId} onChange={e => setUserId(e.target.value)} required>
-            <option value="">Selecione...</option>
-            {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-          </select>
-        </label>
-        <label>
-          Curso
-          <select value={courseId} onChange={e => setCourseId(e.target.value)} required>
-            <option value="">Selecione...</option>
-            {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-          </select>
-        </label>
-        {error && <p className="error">{error}</p>}
-        <button type="submit" disabled={loading}>
-          {loading ? 'Matriculando...' : 'Matricular'}
-        </button>
-      </form>
-    </div>
-  )
-}
-
-function RegistrationStatus() {
-  const [regId, setRegId] = useState('')
-  const [data, setData] = useState(null)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  const handleSearch = (e) => {
-    e.preventDefault()
-    setError('')
-    setData(null)
-    setLoading(true)
-
-    fetch(`${API}/registration-numbers/${regId}`)
-      .then(r => {
-        if (!r.ok) return r.text().then(t => { throw new Error(t) })
-        return r.json()
-      })
-      .then(setData)
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
-  }
-
-  return (
-    <div>
-      <h1>Status da Matrícula</h1>
-      <form onSubmit={handleSearch}>
-        <label>
-          ID da Matrícula
-          <input type="number" value={regId} onChange={e => setRegId(e.target.value)} required />
-        </label>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Buscando...' : 'Buscar'}
-        </button>
-      </form>
-
-      {error && <p className="error">{error}</p>}
-
-      {data && (
-        <div className="status-card">
-          <h2>Matrícula #{data.id}</h2>
-          <p><strong>Usuário ID:</strong> {data.userId}</p>
-          <p><strong>Curso ID:</strong> {data.courseId}</p>
-          <p><strong>Status:</strong> <span className={`badge ${data.status}`}>{data.status}</span></p>
-          {data.finalGrade != null && <p><strong>Nota Final:</strong> {data.finalGrade}</p>}
-          <p><strong>Bônus:</strong> {data.bonus ? 'Sim' : 'Não'}</p>
+        <div className="brand">
+          <strong>TopClass</strong>
+          <span className="muted small">Painel de testes da API</span>
         </div>
-      )}
+        {PAGES.map(p => (
+          <button key={p.key} type="button" className={p.key === current.key ? 'nav active' : 'nav'} onClick={() => go(p.key)}>
+            <span>{p.label}</span>
+            <code>{p.path}</code>
+          </button>
+        ))}
+        <ApiBase />
+        <button type="button" className="ghost small-btn" onClick={() => setLogOpen(o => !o)}>
+          {logOpen ? 'Esconder log' : 'Mostrar log'}
+        </button>
+      </nav>
+
+      <main className="content">
+        <Component key={current.key} />
+      </main>
+
+      {logOpen && <RequestLog entries={log} onClear={() => setLog([])} />}
     </div>
   )
 }
 
-export default App
+function ApiBase() {
+  const [value, setValue] = useState(getBaseUrl())
+  const [saved, setSaved] = useState(false)
+
+  return (
+    <form
+      className="api-base"
+      onSubmit={e => {
+        e.preventDefault()
+        setBaseUrl(value)
+        setSaved(true)
+        setTimeout(() => window.location.reload(), 300)
+      }}
+    >
+      <label className="field">
+        <span className="small">URL da API</span>
+        <input value={value} onChange={e => setValue(e.target.value)} placeholder="(mesma origem)" />
+      </label>
+      <button type="submit" className="ghost small-btn">{saved ? 'Salvo' : 'Aplicar'}</button>
+    </form>
+  )
+}
+
+function RequestLog({ entries, onClear }) {
+  const [openId, setOpenId] = useState(null)
+
+  return (
+    <aside className="log">
+      <div className="log-header">
+        <h2>Requisições</h2>
+        <button type="button" className="link" onClick={onClear}>Limpar</button>
+      </div>
+      {entries.length === 0 && <p className="muted small">As chamadas feitas para a API aparecem aqui.</p>}
+      <ul>
+        {entries.map(e => (
+          <li key={e.id}>
+            <button type="button" className="log-line" onClick={() => setOpenId(openId === e.id ? null : e.id)}>
+              <span className={`method m-${e.method.toLowerCase()}`}>{e.method}</span>
+              <span className="path">{e.url.replace(/^https?:\/\/[^/]+/, '')}</span>
+              <span className={`status s-${String(e.status)[0]}`}>{e.status || 'ERR'}</span>
+            </button>
+            {openId === e.id && (
+              <div className="log-detail">
+                <small className="muted">{e.ms} ms · {e.at.toLocaleTimeString()}</small>
+                {e.requestBody !== undefined && (
+                  <>
+                    <small>Request body</small>
+                    <pre className="json">{JSON.stringify(e.requestBody, null, 2)}</pre>
+                  </>
+                )}
+                <small>Response</small>
+                <pre className="json">{typeof e.responseBody === 'string' ? e.responseBody : JSON.stringify(e.responseBody, null, 2)}</pre>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )
+}
